@@ -9,7 +9,7 @@ steps:
    1.2 type "py -m venv my_venv" and press enter
    1.3 type "my_venv\Scripts\activate.bat" and press enter
 2. install dependecies
-   2.1 type "pip install -r dependecies.txt"
+   2.1 type "pip install -r dependencies.txt"
 3. run the application
    3.1 type and enter "flask run" to run the app, changes will not be updated during runtime
    3.2 or type and enter "flask --debug run" to run the debug mode, changes will be updated during runtime
