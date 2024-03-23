@@ -5,7 +5,7 @@ you need to create a virtual enviroment to run the application locally, so pytho
 
 steps:
 1. create a virtual enviroment
-   1.1 open cmd (no powershell) in the folder
+   1.1 open command prompt (cmd, no powershell) in the folder
    1.2 type "py -m venv my_venv" and press enter
    1.3 type "my_venv\Scripts\activate.bat" and press enter
 2. install dependecies
