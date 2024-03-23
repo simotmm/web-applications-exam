@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Categoria: {{categoria}}{% endblock %}
+{% block home_active %}active{% endblock %}
+
+{% block content %}
+
+<div class="container text-center">
+    <h3>Serie Podcast per categoria '<strong><a href="{{url_for('listaSeriePerCategoria', categoria=categoria)}}">{{categoria}}</a></strong>'</h3>
+
+    <div class="row">
+        <!-- colonna a destra -->
+        <aside class="col">
+            <br> <br>
+            <div class="btn-group">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Naviga per Categoria
+                </button>
+                <ul class="dropdown-menu">
+                    {%if categorie %}
+                        {% for c in categorie %}
+                            <li><a class="dropdown-item" href="{{url_for('listaSeriePerCategoria', categoria=c.nome)}}">{{c.nome}}</a></li>
+                        {% endfor %}
+                    {% else %}
+                        <li><a class="dropdown-item" href="#">Nessuna categoria presente</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </aside>
+
+        <!-- colonna principale -->
+        <main class="col-6 justify-content-center">
+
+            {% if not serie %}
+                <h6>Nessuna serie podcast appartenente alla categoria '{{categoria}}' trovata</h6>
+            {% endif %}
+
+            
+            <br>
+
+            <section class="row row-cols-1 row-cols-md-3 g-4">
+                {% for s in serie %}
+                    <div class="col">
+                        <div class="card bg-light">
+                            <a href="{{url_for('serie', codS=s.codS)}}">
+                                <img src="{{ url_for('static', filename='img/'+s.file) }}" class="card-img-top" alt="Immagine di copertina della serie {{s.titolo}}">
+                            </a>
+                            <div class="card-body">
+                                <a href="{{url_for('serie', codS=s.codS)}}">
+                                    <h5 class="card-title">{{s.titolo}}</h5>
+                                </a>
+                                <a href="{{url_for('profilo', username=s.username)}}">
+                                    <span class="badge bg-primary">una serie di @{{s.username}}</span>
+                                </a>
+                                <p class="card-text-personalizzato">{{s.descrizione}}</p>
+                                <a href="{{url_for('serie', codS=s.codS)}}" type="button" class="btn btn-outline-primary">Ascolta ora</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+        </main>
+
+        <!--colonna a sinistra -->
+        <div class="col "> <br> <br>
+            {% if creators%}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title">Content Creator che trattano di <a href="{{url_for('listaSeriePerCategoria', categoria=categoria)}}"><span class="badge rounded-pill text-bg-info">{{categoria}}</span></h6></a>
+                        <div class="list-group">
+                            {%for c in creators %}
+                                <a href="{{url_for('profilo', username=c.username)}}" 
+                                class="list-group-item list-group-item-action">
+                                <img class="circle-propic-small"
+                                        src="{{ url_for('static', filename='/img/'+c.propic ) }}"
+                                        alt="immagine del profilo dell'utente @{{ c.username |e }}">
+                                @{{c.username}}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+
+    
+         
+            
+    </div>
+
+    <br>
+    <br>
+    <br>
+
+</div>
+
+
+
+{% endblock %}

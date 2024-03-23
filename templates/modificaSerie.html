@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Modifica Serie{% endblock %}
+
+{% block content %}
+<p><strong>Modifica Serie '{{serie.titolo}}'</strong></p>
+<div class="flex-grow-1 text-start px-4">
+    <a href="{{url_for('serie', codS=serie.codS)}}" type="button" class="btn btn-primary btn-sm">Torna alla serie</a>
+</div>
+<!-- controllo del form front-end:
+     1. titolo episodio: required, lunghezza minima 3 caratteri
+     2. descrizione: required
+     3. data: nessun controllo, se non viene impostata viene assegnata la data corrente in app.py
+     5. serie: compare solo se l'utente ha creato delle serie in precedenza, se le ha create si può
+        scegliere tra le serie o lasciare il campo vuoto che ha valore -1, trattato opportunamente in app.py 
+     6. file audio: required -->
+<main class="col-5 bg-light p-4 border rounded">
+
+    <form action="/modificaSeriePost" method="POST" enctype="multipart/form-data">
+        <label for="titolo" class="form-label">Titolo Serie</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="titolo" id="titolo" required minlength="3"
+                   maxlength="100" value="{{serie.titolo}}">
+        </div>
+
+        <hr class="border">
+        <label for="descrizione">Descrizione</label>
+        <div class="input-group">
+            <textarea name="descrizione" class="form-control" aria-label="With textarea" maxlength="4000" required>{{serie.descrizione}}
+            </textarea>
+        </div>
+
+        <hr class="border">
+        <div class="mb-3">
+            <label for="categoria">Categoria</label>
+            <select title="categoria" id="categoria" name="categoria" required>
+                <option value="{{serie.categoria}}">{{serie.categoria}}</option>
+            {% for categoria in categorie %}
+               <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+            {% endfor %}
+        </div>
+        
+        <hr class="border">
+        <div class="mb-3">
+            <label for="file" class="form-label">Copertina Serie</label>
+            <input type="file" class="form-control" name="file" id="file"> <!-- non è richiesto, se non viene selezionato rimane quello attuale -->
+        </div>
+
+        <input type="hidden" name="codS" value="{{serie.codS}}">
+        <button type="submit" class="btn btn-primary">✔️Salva Modifiche</button>
+    </form>
+
+    <br>
+    <form action="/eliminaSerie" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="codS" value="{{serie.codS}}">
+        <button type="submit" class="btn btn-secondary">❌Elimina Serie</button>
+    </form>
+
+</main>
+    
+
+    
+    {% if episodi %}
+        <div class="col-5 bg-light p-4 border rounded">
+            <p>Episodi di '{{serie.titolo}}'</p>
+                <div class="list-group">
+                    {% for e in episodi %}
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <strong>{{e.titolo}}</strong>
+                            <form action="/rimuoviEpisodioDaSerie" method="POST">
+                                <input type="hidden" name="codS" value="{{e.codS}}">
+                                <input type="hidden" name="codE" value="{{e.codE}}">
+                                <button type="submit" class="btn btn-secondary">❌Rimuovi Episodio dalla Serie</button>
+                            </form>
+                        </a>    
+                    {% endfor %}
+                </div>
+            {% endif %}
+                
+            <br>
+                
+            {% if altriEpisodi %}
+            <hr class="border">
+            <p>I tuoi episodi senza serie</p>
+                <div class="list-group">
+                    {% for e in altriEpisodi %}
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <strong>{{e.titolo}}</strong>
+                            <form action="/addEpisodioASerie" method="POST">
+                                <input type="hidden" name="codS" value="{{serie.codS}}">
+                                <input type="hidden" name="codE" value="{{e.codE}}">
+                                <button type="submit" class="btn btn-success">➕Aggiungi Episodio alla Serie</button>
+                            </form>
+                        </a>    
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <h1><br></h1>
+        <h1><br></h1>
+        <h1><br></h1>
+    
+    
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Database{% endblock %}
+
+{% block content %}
+
+<main>
+
+    <h1>Database (Episodi, Utenti, Serie)</h1>
+
+    <h2>Episodi</h2>
+    <table>
+        <tr>
+            <th>codU</th>
+            <th>codS</th>
+            <th>Data</th>
+            <th>Titolo Episodio</th>
+            <th>File</th>
+            <th>Descrizione</th>
+        </tr>
+        {% for e in db.episodi%}
+            <tr>
+                <td>{{e.codU}}</td>
+                <td>{{e.codS}}</td>
+                <td>{{e.data}}</td>
+                <td><a href="{{url_for('episodio', codE=e.codE)}}">{{e.titolo}}</a></td>
+                <td><figure><audio controls src="{{url_for('static', filename='audio/'+e.file)}}"></audio></figure></td>
+                <td>{{e.descrizione}}</td>
+            </tr>
+        {% endfor%}
+    </table>
+
+    <br><br>
+    <h2>Utenti</h2>
+    <table>
+        <tr>
+            <th>codU</th>
+            <th>Propic</th>
+            <th>@username</th>
+            <th>Nickname</th>
+            <th>Tipo di Account</th>
+        </tr>
+        {% for u in db.utenti%}
+            <tr>
+                <td>{{u.codU}}</td>
+                <td><img src="{{url_for('static', filename='img/'+u.propic)}}" width="30px"></td>
+                <td><a href="{{url_for('profilo', username=u.username)}}">{{u.username}}</a></td>
+                <td>{{u.nickname}}</td>
+                <td>{%if u.creatore==1%}Creatore{%else%}Ascoltatore{%endif%}</td>
+            </tr>
+        {% endfor%}
+    </table>
+
+    <br><br>
+    <h2>Serie</h2>
+    <table class="list-group-numbered">
+        <tr>
+            <th>codS</th>
+            <th>codU</th>
+            <th>Immagine</th>
+            <th>Titolo</th>
+            <th>Descrizione</th>
+        </tr>
+        {% for s in db.serie%}
+            <tr>
+                <td>{{s.codS}}</td>
+                <td>{{s.codU}}</td>
+                <td><img src="{{url_for('static', filename='img/'+s.file)}}" width="30px"></td>
+                <td><a href="{{url_for('serie', codS=s.codS)}}">{{s.titolo}}</a></td>
+                <td>"{{s.descrizione}}"</td>
+            </tr>
+        {% endfor%}
+    </table>
+
+    <br><br>
+    <h2>Commenti</h2>
+    <table class="list-group-numbered">
+        <tr>
+            <th>codC</th>
+            <th>codE</th>
+            <th>CodU</th>
+            <th>@username</th>
+            <th>Episodio</th>
+            <th>Testo</th>
+            <th>Data</th>
+        </tr>
+        {% for s in db.commenti%}
+            <tr>
+                <td>{{s.codC}}</td>
+                <td>{{s.codE}}</td>
+                <td>{{s.codU}}</td>
+                <td>@{{s.username}}</td>
+                <td><a href="{{url_for('episodio', codE=s.codE)}}">{{s.titolo}}</a></td>
+                <td>"{{s.Testo}}"</td>
+                <td>"{{s.data}}"</td>
+            </tr>
+        {% endfor%}
+    </table>
+
+</main>
+<h1><br></h1>
+<h1><br></h1>
+<h1><br></h1>
+
+
+
+{% endblock %}
+
+

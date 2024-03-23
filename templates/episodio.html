@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% block title %}{{episodio.titolo}}{% endblock %}
+{% block home_active %}active{% endblock %}
+
+{% block content %}
+<p><strong>Episodio Podcast: '{{episodio.titolo}}' (di @{{autore.username}})</strong></p>
+
+<main class="container text-center">
+    <div class="row">
+        
+        <!-- colonna aside -->
+        <aside class="col">
+
+            {%if serie and (altreSerieDellaCategoria) %}
+                <br> <br> <br> <br>
+                <aside class="aside-col-left">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Altre serie dalla categoria <a href="{{url_for('listaSeriePerCategoria', categoria=serie.categoria)}}">{{serie.categoria}}</a></h6>
+                            <div class="list-group">
+                                {%for s in altreSerieDellaCategoria %}
+                                    {% if episodio.codS!=s.codS %}
+                                        <a href="{{url_for('serie', codS=s.codS)}}" class="list-group-item list-group-item-action">{{s.titolo}}</a>
+                                    {%endif%}
+                                {%endfor%}
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            {%endif%}
+
+            <br><br>
+
+               
+            <div class="btn-group">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Naviga per Categoria
+                </button>
+                <ul class="dropdown-menu">
+                    {%if categorie %}
+                        {% for c in categorie %}
+                            <li><a class="dropdown-item" href="{{url_for('listaSeriePerCategoria', categoria=c.nome)}}">{{c.nome}}</a></li>
+                        {% endfor %}
+                    {% else %}
+                        <li><a class="dropdown-item" href="#">Nessuna categoria presente</a></li>
+                    {% endif %}
+                </ul>
+              </div>
+        </aside>
+
+        <!-- colonna principale -->
+        <main class="col-7 align-items-center">
+            <h4>Episodio Podcast: {{episodio.titolo}}</h4>
+
+            <!-- Episodio -->
+            <article class="row container border bg-light rounded align-items-center">
+    
+                <section class="row">
+                    <!--immagine e audio player-->
+                    <section class="col-5">
+                        {% if serie %}
+                            <a href="{{url_for('serie', codS=serie.codS)}}">
+                            <img class="p-2 post-image text-star" src="{{ url_for('static', filename='img/'+serie.file) }}" alt="immagine di copertina della serie '{{serie.titolo}}' "> </a>
+                        {% else %}
+                            <img class="p-2 post-image" src="{{ url_for('static', filename='img/defaultSerie.png') }}" alt="immagine di copertina placeholder per serie">
+                        {% endif %}
+
+                        <!--audio player-->
+                        <section class="row">
+                            <div class="col text-centert">
+                                {% if current_user.is_authenticated %}
+                                <figure>
+                                    <audio controls src="{{url_for('static', filename='audio/'+episodio.file)}}"> </audio>
+                                </figure>
+                            {%else%}
+                                <p>Per ascoltare l'episodio
+                                    <a href="{{url_for('login')}}" type="button" class="btn btn-primary btn-sm">accedi</a> o
+                                    <a href="{{url_for('iscriviti')}}" type="button" class="btn btn-primary btn-sm">registrati</a>
+                                </p>
+                            {% endif %}
+                            </div>
+                        </section>
+                    </section>
+
+                    <!--dati episodio-->
+                    <section class="col text-start">
+                        <br>
+                        <h3>{{episodio.titolo}}</h3>
+                        {% if serie %}
+                            <h6>(dalla serie <strong><a href="{{url_for('serie', codS=serie.codS)}}">{{serie.titolo}}</a></strong>)</h6>
+                        {% endif %}
+
+                        <!--propic e dati autore-->
+                        <div class="row justify-content-start">
+                            <div class="col-2 align-self-center">
+                                <a href="{{ url_for('profilo', username=autore.username) }}">
+                                    <img class="usrimg rounded-circle" 
+                                    src="{{ url_for('static', filename='/img/'+autore.propic ) }}"
+                                    alt="immagine dell'utente @{{ autore.username |e }}">
+                                </a>
+                            </div>
+                            <div class="col align-self-center">
+                                <h7>di <strong>{{autore.nickname}} </strong>
+                                    <br>(<strong><a href="{{ url_for('profilo', username=autore.username) }}">@{{autore.username}}</a>)</strong>
+                                </h7>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-end">
+                            {% if current_user.codU==autore.codU %}
+                                <div class="flex-grow-1 text-end">
+                                    <a href="{{url_for('modificaEpisodio', codE=episodio.codE)}}" type="button" class="btn btn-primary btn-sm">Modifica Episodio</a></td>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </section>
+
+                </section>
+                
+                <!--descrizione episodio-->
+                <section class="row">
+                    <div class="card text-start">
+                        <div class="row card-header">
+                            <div class="col text-start">Descrizione Episodio</div>
+                            <div class="col text-end text-muted">data di pubblicazione: {{episodio.data}}</div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">{{episodio.descrizione}}</p>
+                        </div>
+                    </div>
+                </section>
+                <div>
+                    <br>
+                </div>
+
+            </article>
+            <br>
+
+            <!--sezione commenti-->
+            
+            <article class="row container border bg-light rounded align-items-center">
+                <p></p>
+                {% if current_user.is_authenticated %}
+                    <!--nuovo commento-->
+                    <section class="row text">
+                        <!--propic utente loggato-->
+                        <section class="col-1">
+                            <a href="{{ url_for('profilo', username=current_user.username) }}">
+                                <img class="usrimg rounded-circle"
+                                    src="{{ url_for('static', filename='img/'+current_user.propic ) }}"
+                                    alt="Questa è l'immagine dell'utente {{ current_user.username |e }}">
+                            </a> 
+                        </section>
+                        <!--form per nuovo commento-->
+                        <section class="col">
+                            <form action="nuovoCommento" method="POST" id="testo">
+                                <div class="mb-3">
+                                    <textarea class="form-control" id="testo" rows="3" placeholder="Scrivi un commento..." name="testo" form="testo" minlength="3"></textarea>
+                                    <input type="hidden" name="codE" value="{{ episodio.codE }}" />
+                                    <input type="hidden" name="codU" value="{{ current_user.codU }}" />
+                                    <div class="pt-2 text-end">
+                                        <button type="submit" class="btn btn-primary">Pubblica Commento</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </section>
+                    </section>
+
+                {%else%}
+                    <p class="text-start">Per commentare l'episodio
+                        <a href="{{url_for('login')}}" type="button" class="btn btn-primary btn-sm">accedi</a> o
+                        <a href="{{url_for('iscriviti')}}" type="button" class="btn btn-primary btn-sm">registrati</a>
+                    </p>
+                {% endif %}
+
+
+                <!-- commenti -->
+                {% if commenti %}
+
+                    <hr class="border">
+                    <h6 class="text-start">Commenti</h6>
+            
+                    {% for commento in commenti%}
+                        <hr class="border">
+                        <section class="row text-start">
+                            <!--propic commentatore-->
+                            <section class="col-1">
+                                <a href="{{ url_for('profilo', username=commento.username) }}">
+                                    <img class="usrimg rounded-circle"
+                                        src="{{ url_for('static', filename='img/'+commento.propic ) }}"
+                                        alt="Questa è l'immagine dell'utente @{{ commento.username |e }}">
+                                </a> 
+                            </section>
+
+                            <!--dati commento-->
+                            <section class="col text start">
+
+                                <div class="row text-start">
+                                    <div class="col ">
+                                        <h6><a href="{{ url_for('profilo', username=commento.username) }}">@{{commento.username}}</a></h6>
+                                        <div class="col text-start text-muted fontData">{{commento.data}}</div>
+                                    </div>
+                                </div>
+
+                                <div class="row text-start">
+                                    <h8>{{commento.testo}}</h8>
+                                </div>
+
+                            </section>
+
+                            <!--pulsante di modifica-->
+                            {% if current_user.is_authenticated %}
+                                {% if current_user.codU==commento.codU %}
+                                    <section class="col text-end">
+                                        <div class="dropdown-menu-dark">
+                                            <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="dropdown" >⋮</button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <!-- bottone del modale -->
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                        🖋Modifica Commento
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <form action="/eliminaCommento" method="POST">
+                                                        <input type="hidden" id="codC" name="codC" value="{{commento.codC}}">
+                                                        <input type="hidden" id="codE" name="codE" value="{{commento.codE}}">
+                                                        <button type="submit" class="btn btn-outline-secondary">❌Elimina Commento</button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- contenuto del modale -->
+                                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modifica Commento</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+
+                                                    <div class="modal-body">
+                                                        <form action="/modificaCommentoPost" method="POST" enctype="multipart/form-data">
+
+                                                            <div class="input-group">
+                                                                <textarea name="testo" class="form-control" aria-label="With textarea" maxlength="4000" required>{{commento.testo}}</textarea>
+                                                            </div>
+                                                    
+                                                            <input type="hidden" id="codC" name="codC" value="{{commento.codC}}">
+                                                            <input type="hidden" id="codE" name="codE" value="{{commento.codE}}">
+                                                            <input type="hidden" id="codU" name="codU" value="{{commento.codU}}">
+                                                            <br>
+                                                            <button type="submit" class="btn btn-primary">Modifica Commento</button>
+                                                        </form>
+                                                    </div>
+                                
+                                                    <br>
+
+                                                </div>
+                                            </div>        
+                                        </div>    
+                                    </section>
+                                {% endif %}
+                            {% endif %}
+
+
+
+                        </section>
+                 
+                    {%endfor%}
+                    
+                {%endif%}
+            </article>  
+            <br>
+
+        </main>
+
+        <!-- colonna per episodi e altre serie laterali -->
+        <div class="col">
+            
+                
+                <br> <br><br> 
+
+                {%if serie and episodiSerie %}
+                    <aside class="col">
+                        <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Altri episodi dalla serie <a href="{{url_for('serie', codS=serie.codS)}}">{{serie.titolo}}</a></h6>
+                            <div class="list-group list-group-numbered text-start">
+                                {%for e in episodiSerie %}
+                                {% if( (e.data<=dataCorrente) or (current_user.is_authenticated and current_user.codU==e.codU) ) %}
+                                    {%if episodio.codE==e.codE%}
+                                    <a href="{{url_for('episodio', codE=e.codE)}}" class="list-group-item list-group-item-action active" aria-current="true">▶️{{e.titolo}}</a>
+                                    {%else%}
+                                    <a href="{{url_for('episodio', codE=e.codE)}}" class="list-group-item list-group-item-action">▶️{{e.titolo}}</a>
+                                    {%endif%}
+                                {%endif%}
+                                {%endfor%}
+                            </div>
+                        </div>
+                        </div>
+                    </aside>
+                    {%endif%}
+                    <br>
+                    
+                    {%if serie and altreSerieDellAutore %}
+                        <aside class="aside-col-left">
+                            <div class="card bg-light" >
+                            <div class="card-body">
+                                <h6 class="card-title">Altre serie di <a href="{{url_for('profilo', username=autore.username)}}">@{{autore.username}}</a></h6>
+                                <div class="list-group">
+                                    {%for s in altreSerieDellAutore %}
+                                    {%if episodio.codS!=s.codS%}
+                                        <a href="{{url_for('serie', codS=s.codS)}}" class="list-group-item list-group-item-action">{{s.titolo}}</a>
+                                    {%endif%}
+                                    {%endfor%}
+                                </div>
+                            </div>
+                            </div>
+                        </aside>
+                    {%endif%}
+                    <br>
+
+            
+        </div>
+            
+    </div>
+
+    <h1><br></h1>
+    <h1><br></h1>
+    
+</main>
+
+{% endblock %}

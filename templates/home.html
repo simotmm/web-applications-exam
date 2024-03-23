@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block home_active %}active{% endblock %}
+
+{% block content %}
+<h6 class="text-start"><strong>Homepage</strong></h6>
+<h3 class="text-center"><strong>Le Serie Podcast del momento</strong></h3>
+
+
+<div class="container justify-content-center">
+
+  <div class="row">
+
+    <!-- colonna a sinistra -->
+    <aside class="col">
+      <div class="btn-group">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Naviga per Categoria
+        </button>
+        <ul class="dropdown-menu">
+          {%if categorie %}
+              {% for c in categorie %}
+                <li><a class="dropdown-item" href="{{url_for('listaSeriePerCategoria', categoria=c.nome)}}">{{c.nome}}</a></li>
+              {% endfor %}
+            {% else %}
+              <li><a class="dropdown-item" href="#">Nessuna categoria presente</a></li>
+            {% endif %}
+        </ul>
+      </div>
+    </aside>
+
+    <!-- colonna centrale -->
+    <!--<a href="{{ url_for('utenti') }}">Lista Utenti</a>-->
+    <main class="col col-8 align-self-center">
+      {% for a in serie %}
+        <article class="card mb-3 align-self-center">
+          <div class="row g-0">
+            <section class="col-md-4">
+              <a href= "{{ url_for('serie', codS=a.codS) }}">
+                <img src="{{ url_for('static', filename='img/'+a.file) }}" class="img-fluid rounded-start" alt="Immagine di copertina della serie '{{a.titolo}}'">
+              </a>
+            </section>
+            <section class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">{{a.titolo}}
+                  <a href="{{url_for('listaSeriePerCategoria', categoria=a.categoria)}}">
+                    <span class="badge rounded-pill text-bg-primary">{{a.categoria}}</span>
+                  </a>
+                </h5>
+                <p class="card-text"><small class="text-muted">Una serie di <strong>
+                  <a href="{{ url_for('profilo', username=a.username) }}">@{{a.username}}</a>
+                  </strong></small>
+                </p>
+
+                <div class="container">
+                  <div class="row text-start">
+                    <div class="col-1 align-self-center ">
+                      {% if a.propic %}
+                          <a href="{{ url_for('profilo', username=a.username) }}">
+                          <img class="usrimg rounded-circle"
+                            src="{{ url_for('static', filename='/img/'+a.propic ) }}"
+                            alt="Questa è l'immagine dell'utente @{{ a.username |e }}">
+                          </a>
+                      {% endif %}
+                    </div>
+                    <div class="col align-self-center">
+                      <h5>{{a.nickname}}</h5>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <p class="card-text ">{{a.descrizione}}</p>
+                    <a href="{{url_for('serie', codS=a.codS)}}" type="button" class="align-bottom btn btn-primary btn-sm">Vai alla Serie</a>
+                  </div>
+
+                </div>
+
+
+                
+                
+              </div>
+            </section>
+          </div>
+        </article>
+      {% endfor %}
+    </main>
+
+    <aside class="col"> <br> <br> <br>
+      <div class="card bg-light align-self-center ">
+        <div class="card-body">
+          <h6 class="justify-self-center text-center">Creators</h6>
+          <div class="list-group">
+            {%for u in db.utenti %}
+              {% if u.creatore==1 %}
+                <a href="{{url_for('profilo', username=u.username)}}" 
+                    class="list-group-item list-group-item-action">
+                  <img class="circle-propic-small" src="{{ url_for('static', filename='/img/'+u.propic ) }}"
+                        alt="Questa è l'immagine dell'utente {{ u.nickname |e }}">@{{u.username}}
+                </a>
+              {% endif %}
+            {%endfor%}
+          </div>
+        </div>
+      </div>
+
+
+      <br><br>
+      <div class="card bg-light align-self-center ">
+        <div class="card-body">
+          <h6 class="card-title justify-content-center text-center">Ascoltatori</h6>
+          <div class="list-group">
+            {%for u in db.utenti %}
+              {% if u.creatore==0 %}
+                <a href="{{url_for('profilo', username=u.username)}}" 
+                    class="list-group-item list-group-item-action">
+                  <img class="circle-propic-small" src="{{ url_for('static', filename='/img/'+u.propic ) }}"
+                        alt="Questa è l'immagine dell'utente {{ u.nickname |e }}">@{{u.username}}
+                </a>
+              {% endif %}
+            {%endfor%}
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+    </aside>
+
+    <footer>
+        {% if current_user.is_authenticated and current_user.creatore==1 %}
+          <a href="{{ url_for('carica') }}" type="button" class="uploadButton" title="Carica un episodio podcast" >➕<br> Carica un Episodio</a>
+          <a href="{{ url_for('creaSerie') }}" type="button" class="createSeriesButton" title="Crea una serie podcast" >➕<br> Crea una Serie</a>
+        {% endif %}
+    </footer>
+
+  </div>
+
+  <h1><br></h1>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

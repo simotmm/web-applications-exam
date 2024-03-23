@@ -1,0 +1,5 @@
+flask
+flask-login
+flask-session 
+Pillow
+Werkzeug==2.3.8

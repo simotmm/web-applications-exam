@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Registrati{% endblock %}
+{% block signup_active %}active{% endblock %}
+
+{% block content %}
+<p><strong>Registrati</strong></p>
+<!-- controllo del form front-end:
+     1. username: required
+     2. nickname: required
+     3. password: required
+     5. tipo di utente: "ascoltatore" impostato su checked
+     6. immagine del profilo: nessun controllo, se non viene selezionato
+        nessun file ne viene impostato uno di default in app.py -->
+<main class="col-5 bg-light p-4 border rounded">
+    <h5 class="card-title">Registrati</h5><br>
+    <form action="/iscriviti" method="POST" enctype="multipart/form-data">
+
+        <div class="form-floating mb-3">
+            <input class="form-control" id="usernameInput" placeholder="@username" name="username" required minlength="4" maxlength="20">
+            <label for="usernameInput">@username</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input class="form-control" id="usernameInput" placeholder="@username" name="nickname" nicknameInput required minlength="4" maxlength="20">
+            <label for="nicknameInput">Nickname</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="passwordInput" placeholder="Password" name="password" required minlength="4" maxlength="20">
+            <label for="passwordInput" class="form-label">Password</label>
+        </div>
+
+        <div class="mb-3">
+            <div class="btn-group-vertical" role="group" aria-label="Vertical radio toggle button group">
+                <label>Tipo di Utente <br></label>
+                <input type="radio" class="btn-check" id="ascoltatore" name="tipoUtente" value=0 checked autocomplete="off">
+                <label class="btn btn-outline-secondary" for="ascoltatore">Ascoltatore</label>
+                <input type="radio" class="btn-check" id="creatore" name="tipoUtente" value=1 autocomplete="off">
+                <label class="btn btn-outline-primary" for="creatore">Content Creator</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="immagineInput" class="form-label">Immagine del profilo</label>
+            <input type="file" class="form-control" name="immagine_profilo" id="immagineFile">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrati</button>
+    </form>
+</main>
+<h1><br></h1>
+<h1><br></h1>
+<h1><br></h1>
+{% endblock %}

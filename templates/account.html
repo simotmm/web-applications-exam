@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Account: @{{utente.username}} {% endblock %}
+
+{% block content %}
+<p><strong>I dati del tuo account</strong></p>
+
+<main class="row justify-content-center">
+
+    <!-- dati dell'account-->
+    <section class="col-5 bg-light p-4 border rounded align-self-center">
+        <div class="row">
+            <div class="col-1">
+                <img src="{{url_for('static', filename='img/'+utente.propic)}}" alt="immagine del profilo" class="usrimg rounded-circle">
+            </div>
+            <div class="col">
+                <p> <br>  I tuoi dati </p>
+            </div>
+    
+        </div>
+    
+        <div class="list-group">
+            <li class="list-group-item list-group-item-action">Nome Utente: 
+                <strong>@{{utente.username}}</strong>
+            </li>
+            <li class="list-group-item list-group-item-action">Nickname:
+                <strong>{{utente.nickname}}</strong>
+            </li>
+
+            <li class="list-group-item list-group-item-action">
+                <div class="row">
+                    <div class="col text-start">
+                        Privacy del profilo:
+                        {% if utente.privato %} <strong> Profilo Privato</strong>
+                        {%else%} <strong> Profilo Pubblico</strong> {%endif%}
+                    </div>
+                    <!--switch privacy-->
+                    <div class="col text-end">
+                        <form action="/switchPrivacy" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="username" value="{{utente.username}}">
+                                {% if utente.privato %}
+                                    <button type="submit" class="btn btn-primary btn-sm">Passa a Profilo Pubblico</button>
+                                {%else%}
+                                    <button type="submit" class="btn btn-secondary btn-sm">Passa a Profilo Privato</button>
+                                {%endif%}
+                        </form>
+                    </div>
+                </div>
+            </li>
+            
+
+            <a href="#" class="list-group-item list-group-item-action">Tipo di Account: 
+                    <strong>
+                        {% if utente.creatore==1 %}
+                            <span class="badge bg-success fs-6">Content Creator</span>
+                        {% else %}
+                            <span class="badge bg-primary fs-6">Ascoltatore</span>
+                        {% endif %}
+                    </strong>
+            </a>
+            
+            
+        </div>
+    </section>
+
+
+    <!--bottone del modale per modifica account-->
+    <section class="row">
+        
+        <div class="col"></div>
+        <div class="col-2">
+            <br>
+            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" 
+            data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Modifica Account</button>
+        </div>
+        <div class="col"></div>
+        
+    </section> 
+
+    <!-- contenuto del modale-->
+    <main class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modifica Account</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </header>
+                <section class="modal-body">
+                    <form action="/modificaAccount" method="POST" enctype="multipart/form-data">
+
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="usernameInput" value="{{utente.username}}" placeholder="@username" name="username"  minlength="4" maxlength="20">
+                            <label for="usernameInput">@username</label>
+                        </div>
+                
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="usernameInput" value="{{utente.nickname}}" placeholder="Nickname" name="nickname" nicknameInput minlength="4" maxlength="20">
+                            <label for="nicknameInput">Nickname</label>
+                        </div>
+                
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="passwordInput" placeholder="Password corrente" name="password"  minlength="4" maxlength="20">
+                            <label for="passwordInput" class="form-label">Vecchia Password</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="nuovaPasswordInput" placeholder="Nuova password" name="nuovaPassword"  minlength="4" maxlength="20">
+                            <label for="nuovaPasswordInput" class="form-label">Nuova password</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="nuovaPasswordInput2" placeholder="Nuova password" name="nuovaPassword2"  minlength="4" maxlength="20">
+                            <label for="nuovaPasswordInput2" class="form-label">Conferma nuova password</label>
+                        </div>
+
+                        {% if utente.creatore==0%}
+                            <label>Tipo di Utente</label> <br>
+                            <input type="checkbox" name="upgrade" class="btn-check" id="btn-check-2" value=1 autocomplete="off">
+                            <label class="btn btn-outline-success" for="btn-check-2">Effettua l'upgrade a Content Creator</label>
+                        {%endif%}
+
+                        <div class="row">
+                            <div class="col-2">
+                                <img src="{{url_for('static', filename='img/'+utente.propic)}}" alt="immagine del profilo" class="usrimg rounded-circle">
+                            </div>
+                            <div class="col">
+                                <div class="form-check"> <br>
+                                    <input class="form-check-input" type="checkbox" name="rimuoviPropic" value=1 id="flexCheckDefault">
+                                    <label class="form-check-label" for="rimuoviPropic">
+                                        Rimuovi immagine del profilo
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="immagineInput" class="form-label">Immagine del profilo</label>
+                            <input type="file" class="form-control" name="immagine_profilo" id="immagineFile">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <h1><br></h1> 
+    <h1><br></h1>
+    <h1><br></h1>
+    <h1><br></h1>
+
+</main>
+
+{%endblock%}

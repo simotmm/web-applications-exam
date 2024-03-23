@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+{% block title %}Profilo: @{{utente.username}} {% endblock %}
+{% block signup_active %}active{% endblock %}
+
+{% block content %}
+<p></p>
+{% if utente.creatore==0 or totSerieCreate<=1 %}
+    <p id="nascondiFooter" class="nascondi">0</p>
+{% else %}
+    <p id="nascondiFooter" class="nascondi">1</p>
+{% endif %}
+
+<div class="container">
+
+    <!--riga principale profilo-->
+    <main class="row">
+
+        <!--colonna sx-->
+        <aside class="col-2 align-self-center">
+
+            {% if utente.creatore==0 %}
+                <!-- se non è un creator: tabella delle serie seguite-->
+                {% if totSerieSeguitePubblicamente>0 or (current_user.is_authenticated and
+                current_user.username==utente.username) %}
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            {% if current_user.is_authenticated and current_user.username==utente.username %}
+                                <h6 class="card-title">Le serie che segui</h6>
+                            {% else %}
+                                <h6 class="card-title">Le serie seguite da @{{utente.username}}</h6>
+                            {%endif%}
+
+                            <div class="list-group">
+                                {%if not serieSeguite%}
+                                    <p>nessuna serie da mostrare</p>
+                                {%endif%}
+                                {%for s in serieSeguite %}
+                                    {% if s.pubblico==1 or (current_user.is_authenticated and current_user.username==utente.username) %}
+                                        <a href="{{url_for('serie', codS=s.codS)}}" class="list-group-item list-group-item-action">{{s.titolo}}</a>
+                                    {%endif%}
+                                {%endfor%}
+                            </div>
+                        </div>
+                    </div>
+                {%endif%}
+
+            {% else %}
+                <!-- se è un creator: tabella delle serie create -->
+                <div class="card bg-light">
+                    <div class="card-body">
+                        {% if current_user.is_authenticated and current_user.username==utente.username %}
+                            <h6 class="card-title text-center">Le mie serie podcast</h6>
+                        {% else %}
+                            <h6 class="card-title text-center">Le serie podcast di @{{utente.username}}</h6>
+                        {%endif%}
+
+                        <div class="list-group text-center">
+                            {% if totSerieCreate==0 %}
+                                <p>Nessuna serie da mostrare</p>
+                            {%endif%}
+
+                            {%for s in serieCreate %}
+                                <a href="{{url_for('serie', codS=s.codS)}}" class="list-group-item list-group-item-action">{{s.titolo}}</a>
+                            {%endfor%}
+                        </div>
+                    </div>
+                </div>
+            {%endif%}
+
+
+
+        </aside>
+
+        <!--colonna centrale-->
+        <main class="col-8 text-center justify-self-center">
+
+            <!--propic-->
+            <section class="row-4 justify-self-center">
+                {% if current_user.is_authenticated and current_user.username==utente.username %}
+                    <p class="justify-content-center">Il tuo profilo</p>
+                {% else %}
+                    <p class="justify-content-center">Profilo Utente</p>
+                {% endif %}
+                <h3>{{utente.nickname}}</h3>
+                    <img width="300" class="circle shadowOutline" src="{{ url_for('static', filename='/img/'+utente.propic ) }}"
+                         alt="immagine del profilo dell'utente @{{utente.username}}">
+            </section>
+
+            <!--dati utente-->
+            <section class="row">
+                <h1><strong>@{{utente.username}}</strong>
+                    {% if utente.creatore==1 %}
+                        <span class="badge bg-success fs-6">Content Creator</span>
+                    {% else %}
+                        <span class="badge bg-primary fs-6">Ascoltatore</span>
+                    {% endif %}
+                </h1>
+
+                <div class="container text-center">
+                    {%if utente.creatore%}
+                        <div class="row">
+                            <div class="col"></div>
+                            <div class="col">
+                                <p>{{totFollowers}} follower{%if totFollowers!=1%}s{%endif%}</p>
+                                <p>{{totSerieCreate}} serie {%if totSerieCreate==1%}creata{%else%}create{%endif%}</p>
+                            </div>
+                            <div class="col">
+                                <p>{{totSerieSeguite}} serie {%if totSerieSeguite==1%}seguita{%else%}seguite{%endif%}</p>
+                                <p>{{totEpisodi}} {%if totEpisodi==1%}episodio pubblicato{%else%}episodi pubblicati{%endif%}</p>
+                            </div>
+                            <div class="col"></div>
+                        </div>
+                    {%else%}
+                        <p>{{totSerieSeguite}} serie seguite</p>
+                    {%endif%}
+                </div>
+
+                <!--
+                <div class="col align-self-end"><p>{{totFollowers}} follower{%if totFollowers!=1%}s{%endif%}</p></div>
+                <div class="col align-self-start"><p>{{totSerieSeguite}} serie seguite</p></div>
+                -->
+
+
+            </section>
+
+        </main>
+
+        <!--colonna dx-->
+        {% if utente.creatore %}
+            <section class="col align-self-center">
+
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title text-center">
+                            {% if current_user.is_authenticated and current_user.username==utente.username %}
+                                I follower delle tue serie
+                            {% else %}
+                                Follower pubblici delle serie di @<strong><a href="{{url_for('profilo', username=utente.username)}}">{{utente.username}}</strong></a>
+                            {% endif %}
+                        </h6>
+
+                        {% if current_user.is_authenticated and current_user.username==utente.username and not followers %}
+                            <p>Nessun follower da mostrare</p>
+                        {% elif not current_user.is_authenticated and not followers %}
+                            <p>Nessun follower pubblico da mostrare</p>
+                        {% else %}
+                            <div class="list-group">
+                                {%for f in followers %}
+                                    <a href="{{url_for('profilo', username=f.username)}}"
+                                        class="list-group-item list-group-item-action">
+                                        <img class="circle-propic-small"
+                                            src="{{ url_for('static', filename='/img/'+f.propic ) }}"
+                                            alt="immagine del profilo dell'utente @{{f.username}}">@{{f.username}}
+                                    </a>
+                                {%endfor%}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </section>
+        {%endif%}
+
+    </main>
+
+    <!--riga per i tre pulsanti-->
+    <section class="row">
+
+        <div class="col">
+            <h1 class="display-5">
+                <a href="{{url_for('home')}}"
+                    type="button" class="btn btn-primary btn-lg">
+                        Torna alla Homepage
+                </a>
+            </h1>
+        </div>
+
+        <div class="col-8  text-center justify-self-center">
+            {% if utente.creatore==1 %}
+                <h1 class="display-5">
+                    <a href="{{url_for('listaSeriePerAutore', username=utente.username)}}"
+                        type="button" class="btn btn-primary btn-lg">
+                        {% if current_user.is_authenticated and current_user.username==utente.username%}
+                            Vai alle mie Serie Podcast
+                        {% else %}
+                            Vai alle Serie Podcast pubblicate da {{utente.nickname}}
+                        {% endif %}
+                    </a>
+                </h1>
+            {% endif %}
+        </div>
+
+        <div class="col">
+            <h1 class="display-5">
+                <a href="{{url_for('listaSerieSeguite', username=utente.username)}}"
+                 type="button" class="btn btn-primary btn-lg">
+                    {% if current_user.is_authenticated and current_user.username==utente.username%}
+                        Vai alle Serie Podcast che seguo
+                    {% else %}
+                        Vedi le Serie Podcast seguite da {{utente.nickname}}
+                    {% endif %}
+                </a>
+            </h1>
+        </div>
+
+
+
+
+
+    </section>
+
+    <!--riga per il carousel-->
+    <section class="row justify-content-center">
+
+        <div class="col justify-content-center">
+            <!--carousel serie-->
+            {%if utente.creatore==1 and totSerieCreate==1 %}
+                <div id="carouselExampleCaptions" class="carousel slide row-5" data-bs-ride="true">
+                    <div class="carousel-item">
+                        <div class="parentInCarousel">
+
+                            <img src="{{ url_for('static', filename='/img/'+serieCreate[0].file) }}"
+                            class=" w-100 d-block fitToRectangularAndBlur sfondoCarousel" width="1920px" height="730px"
+                            alt="immagine della serie {{serieCreate[0].titolo}}">
+
+                            <img src="{{ url_for('static', filename='/img/'+serieCreate[0].file) }}"
+                            class=" w-100 d-block  copertinaCarousel" height="730px"  width="730px"
+                            alt="immagine della serie {{serieCreate[0].titolo}}">
+
+                        </div>
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>{{serieCreate[0].titolo}}
+                                <a href="{{url_for('listaSeriePerCategoria', categoria=serieCreate[0].categoria)}}">
+                                    <span class="badge rounded-pill text-bg-info">{{serieCreate[0].categoria}}</span>
+                                </a>
+                            </h5>
+                            <a href="{{url_for('profilo', username=utente.username)}}">
+                                <span class="badge rounded-pill text-bg-light">di @{{utente.username}}</span>
+                            </a>
+                            <p class="card-text-personalizzato-carousel">{{serieCreate[0].descrizione}}</p>
+                            <a href="{{url_for('serie', codS=serieCreate[0].codS)}}" type="button" class="btn btn-outline-light">Vai alla Serie</a>
+                        </div>
+                    </div>
+                </div>
+            {%endif%}
+
+            {%if utente.creatore==1 and totSerieCreate>1 %}
+                <div id="carouselExampleCaptions" class="carousel slide row-5" data-bs-ride="false">
+                    <div class="carousel-indicators">
+                        {% if totSerieCreate>0 %}
+                            <button type="button" data-bs-target="#carouselExampleCaptions"
+                                    data-bs-slide-to="0" class="active" aria-current="true" aria-label="serieCreate[0].titolo">
+                            </button>
+                        {%endif%}
+                        {% if totSerieCreate>1 %}
+                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="serieCreate[1].titolo"></button>
+
+                        {% if totSerieCreate>2 %}
+                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="serieCreate[2].titolo"></button>
+                        {%endif%}
+                        {% if totSerieCreate>3 %}
+                            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="3" aria-label="serieCreate[3].titolo"></button>
+                        {%endif%}
+                    </div>
+
+                    {% if totSerieCreate>1 %}
+                        <!--primo elemento-->
+                        <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <div class="parentInCarousel">
+
+                                        <img src="{{ url_for('static', filename='/img/'+serieCreate[0].file) }}"
+                                        class=" w-100 d-block fitToRectangularAndBlur sfondoCarousel" width="1920px" height="730px"
+                                        alt="immagine della serie {{serieCreate[0].titolo}}">
+
+                                        <img src="{{ url_for('static', filename='/img/'+serieCreate[0].file) }}"
+                                            class=" w-100 d-block  copertinaCarousel" height="730px"  width="730px"
+                                            alt="immagine della serie {{serieCreate[0].titolo}}">
+                                    </div>
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>{{serieCreate[0].titolo}}
+                                            <a href="{{url_for('listaSeriePerCategoria', categoria=serieCreate[0].categoria)}}">
+                                                <span class="badge rounded-pill text-bg-info">{{serieCreate[0].categoria}}</span>
+                                            </a>
+                                        </h5>
+                                        <a href="{{url_for('profilo', username=utente.username)}}">
+                                            <span class="badge rounded-pill text-bg-light">di @{{utente.username}}</span>
+                                        </a>
+                                        <p class="card-text-personalizzato-carousel">{{serieCreate[0].descrizione}}</p>
+                                        <a href="{{url_for('serie', codS=serieCreate[0].codS)}}" type="button" class="btn btn-outline-light">Vai alla Serie</a>
+                                    </div>
+                                </div>
+
+                    {%endif%}
+
+                    {% if totSerieCreate>1 %}
+                        <!--secondo elemento-->
+                        <div class="carousel-item">
+                                <div class="parentInCarousel">
+
+                                    <img src="{{ url_for('static', filename='/img/'+serieCreate[1].file) }}"
+                                    class=" w-100 d-block fitToRectangularAndBlur sfondoCarousel" width="1920px" height="730px"
+                                    alt="immagine della serie {{serieCreate[1].titolo}}">
+
+                                    <img src="{{ url_for('static', filename='/img/'+serieCreate[1].file) }}"
+                                    class=" w-100 d-block  copertinaCarousel" height="730px"  width="730px"
+                                    alt="immagine della serie {{serieCreate[1].titolo}}">
+
+                                </div>
+                                <div class="carousel-caption d-none d-md-block">
+                                    <h5>{{serieCreate[1].titolo}}
+                                        <a href="{{url_for('listaSeriePerCategoria', categoria=serieCreate[1].categoria)}}">
+                                            <span class="badge rounded-pill text-bg-info">{{serieCreate[1].categoria}}</span>
+
+                                        </a>
+                                    </h5>
+                                    <a href="{{url_for('profilo', username=utente.username)}}">
+                                        <span class="badge rounded-pill text-bg-light">di @{{utente.username}}</span>
+                                    </a>
+                                    <p class="card-text-personalizzato-carousel">{{serieCreate[1].descrizione}}</p>
+                                    <a href="{{url_for('serie', codS=serieCreate[1].codS)}}" type="button" class="btn btn-outline-light">Vai alla Serie</a>
+                                </div>
+                        </div>
+                    {%endif%}
+
+                    {% if totSerieCreate>2 %}
+                        <!--terzo elemento-->
+                        <div class="carousel-item">
+                                <div class="parentInCarousel">
+
+                                    <img src="{{ url_for('static', filename='/img/'+serieCreate[2].file) }}"
+                                    class=" w-100 d-block fitToRectangularAndBlur sfondoCarousel" width="1920px" height="730px"
+                                    alt="immagine della serie {{serieCreate[2].titolo}}">
+
+                                    <img src="{{ url_for('static', filename='/img/'+serieCreate[2].file) }}"
+                                    class=" w-100 d-block  copertinaCarousel" height="730px"  width="730px"
+                                    alt="immagine della serie {{serieCreate[2].titolo}}">
+
+                                </div>
+                                <div class="carousel-caption  d-none d-md-block">
+                                    <h5>{{serieCreate[2].titolo}}
+                                        <a href="{{url_for('listaSeriePerCategoria', categoria=serieCreate[2].categoria)}}">
+                                            <span class="badge rounded-pill text-bg-info">{{serieCreate[2].categoria}}</span>
+                                        </a>
+                                    </h5>
+                                    <a href="{{url_for('profilo', username=utente.username)}}">
+                                        <span class="badge rounded-pill text-bg-light">di @{{utente.username}}</span>
+                                    </a>
+                                    <p class="card-text-personalizzato-carousel">{{serieCreate[2].descrizione}}</p>
+
+                                    <a href="{{url_for('serie', codS=serieCreate[2].codS)}}" type="button" class="btn btn-outline-light">Vai alla Serie</a>
+                                </div>
+                        </div>
+                    {%endif%}
+
+                    {% if totSerieCreate>3 %}
+                        <!--quarto elemento-->
+                        <div class="carousel-item">
+                                <div class="parentInCarousel">
+
+                                    <img src="{{ url_for('static', filename='/img/'+serieCreate[3].file) }}"
+                                    class=" w-100 d-block fitToRectangularAndBlur sfondoCarousel" width="1920px" height="730px"
+                                    alt="immagine della serie {{serieCreate[3].titolo}}">
+
+                                    <img src="{{ url_for('static', filename='/img/'+serieCreate[3].file) }}"
+                                    class=" w-100 d-block  copertinaCarousel" height="730px"  width="730px"
+                                    alt="immagine della serie {{serieCreate[3].titolo}}">
+
+                                </div>
+                                <div class="carousel-caption  d-none d-md-block">
+                                    <h5>{{serieCreate[3].titolo}}
+                                        <a href="{{url_for('listaSeriePerCategoria', categoria=serieCreate[3].categoria)}}">
+                                            <span class="badge rounded-pill text-bg-info">{{serieCreate[3].categoria}}</span>
+                                        </a>
+                                    </h5>
+                                    <a href="{{url_for('profilo', username=utente.username)}}">
+                                        <span class="badge rounded-pill text-bg-light">di @{{utente.username}}</span>
+                                    </a>
+                                    <p class="card-text-personalizzato-carousel">{{serieCreate[3].descrizione}}</p>
+                                    <a href="{{url_for('serie', codS=serieCreate[3].codS)}}" type="button" class="btn btn-outline-light">Vai alla Serie</a>
+                                </div>
+                        </div>
+                    {%endif%}
+
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Precedente</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Successiva</span>
+                </button>
+                        </div>
+                    {%endif%}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+
+    <!-- bottoni di upload-->
+    <footer>
+        {% if current_user.is_authenticated and current_user.creatore==1 and current_user.username==utente.username %}
+          <a href="{{ url_for('carica') }}" type="button" class="uploadButton" title="Carica un episodio podcast" >➕<br> Carica un Episodio</a>
+          <a href="{{ url_for('creaSerie') }}" type="button" class="createSeriesButton" title="Crea una serie podcast" >➕<br> Crea una Serie</a>
+        {% endif %}
+    </footer>
+
+</div>
+
+
+
+{% endblock %}

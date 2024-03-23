@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Crea Serie{% endblock %}
+{% block home_active %}active{% endblock %}
+
+{% block content %}
+<p><strong>Crea una serie podcast</strong></p>
+<!-- controllo del form front-end:
+     1. titolo serie: required, lunghezza minima 3
+     2. descrizione: required
+     3. categoria: required
+     4. file copertina serie: nessun controllo, se non viene selezionato
+        nessun file ne viene impostato uno di default in app.py -->
+<main class="col-5 bg-light p-4 border rounded">
+    <form action="/creaSerie" method="POST" enctype="multipart/form-data">
+
+        <label for="titolo" class="form-label">Titolo Serie</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="titolo" id="titolo" required minlength="3"
+                maxlength="100">
+        </div>
+
+        
+        <label for="descrizione">Descrizione</label>
+        <div class="input-group">
+            <textarea name="descrizione" class="form-control" aria-label="With textarea" maxlength="4000" required></textarea>
+        </div>
+
+        
+        <div class="mb-3">
+            <label for="categoria"><br> Categoria</label>
+            <select title="categoria" id="categoria" name="categoria" required>
+                {% for categoria in categorie %}
+                <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                {% endfor %}
+            </select> 
+        </div>
+        
+        
+        <div class="mb-3">
+            
+            <label for="file" class="form-label">Immagine di copertina</label>
+            <input type="file" class="form-control" name="file" id="file">
+        </div>
+        <button type="submit" class="btn btn-primary">Crea Serie</button>
+    </form>
+    
+</main>
+<h1><br></h1>
+<h1><br></h1>
+<h1><br></h1>
+{% endblock %}

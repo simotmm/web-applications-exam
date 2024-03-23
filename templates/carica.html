@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Carica Episodio{% endblock %}
+
+{% block content %}
+<p><strong>Carica un episodio podcast</strong></p>
+<!-- controllo del form front-end:
+     1. titolo episodio: required, lunghezza minima 3 caratteri
+     2. descrizione: required
+     3. data: nessun controllo, se non viene impostata viene assegnata la data corrente in app.py
+     5. serie: compare solo se l'utente ha creato delle serie in precedenza, se le ha create si può
+        scegliere tra le serie o lasciare il campo vuoto che ha valore -1, trattato opportunamente in app.py 
+     6. file audio: required -->
+<main class="col-5 bg-light p-4 border rounded">
+    <form action="/carica" method="POST" enctype="multipart/form-data">
+
+        <label for="titolo" class="form-label">Titolo Episodio</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="titolo" id="titolo" required minlength="3"
+                maxlength="100">
+        </div>
+
+        
+        <label for="descrizione">Descrizione</label>
+        <div class="input-group">
+            <textarea name="descrizione" class="form-control" aria-label="With textarea" maxlength="4000" required></textarea>
+        </div>
+
+        
+        <div class="mb-3">
+            <label for="data" class="form-label"><br> Data</label>
+            <input type="date" class="form-control" name="data" id="data">
+        </div>
+        
+        {% if not serie %}
+        <input type="hidden" id="codS" name="codS" value=-1>
+        {% else %}
+        
+        <div class="mb-3">
+            <label for="codS">Serie di appartenenza</label>
+            <select title="codS" id="codS" name="codS" required>
+                <option value=-1></option>
+            {% for serieSingola in serie %}
+               <option value="{{ serieSingola.codS }}">{{ serieSingola.titolo }}</option>
+            {% endfor %}
+        </div>
+        
+        {% endif %}
+        
+        <div class="mb-3">
+            
+            <label for="file" class="form-label">File Audio</label>
+            <input type="file" class="form-control" name="file" id="file" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Carica</button>
+    </form>
+
+</main>
+<h1><br></h1>
+<h1><br></h1>
+{% endblock %}

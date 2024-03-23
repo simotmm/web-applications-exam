@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Accedi{% endblock %}
+{% block login_active %}active{% endblock %}
+
+{% block content %}
+<h6><strong>Accedi</strong></h6> 
+
+<main class="col-6 bg-light p-4 border rounded">
+    <h5 class="card-title">Accedi</h5><br>
+
+    <form action="/login" method="POST">
+
+        <div class="form-floating mb-3">
+            <input class="form-control" id="usernameInput" placeholder="@username" name="username" required>
+            <label for="usernameInput">@username</label>
+          </div>
+
+        <hr class="border">
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="passwordInput" placeholder="Password" name="password" required>
+            <label for="passwordInput" class="form-label">Password</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Accedi</button>
+    </form>
+</main>
+<h1><br></h1>
+<h1><br></h1>
+<h1><br></h1>
+<h1><br></h1>
+{% endblock %}

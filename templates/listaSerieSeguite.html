@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}Le serie seguite da @{{utente.username}}{% endblock %}
+{% block home_active %}active{% endblock %}
+
+{% block content %}
+
+<p>
+	<strong>Le serie podcast seguite da '{{utente.nickname}}'</strong>
+</p>
+<!--dati: utente, totSerie, seriePrivate(titolo, descrizione, categoria, file, pubblico, username, codS, codU),
+          seriePubbliche(titolo, descrizione, categoria, file, pubblico, username, codS, codU),
+          followers-->
+<div class="container text-center">
+
+    {% if current_user.is_authenticated and current_user.username==utente.username%}
+	    <h3>Le Serie Podcast che seguo</h3>
+    {% else %}
+        <h3>Le Serie Podcast seguite da 
+            <strong><a href="{{url_for('profilo', username=utente.username)}}">{{utente.nickname}}</a></strong>
+        </h3>
+    {% endif %}
+
+	<div class="row">
+
+		<!-- colonna a destra -->
+		<aside class="col"> <br> <br> <br>
+            <!-- scheda utente -->
+            <div class="card bg-light">
+                <div class="card-body">
+                    <div class="row-4 justify-self-center">
+                        <p>Scheda Utente</p>
+                        <a href="{{url_for('profilo', username=utente.username)}}">
+                            <img width="150" class="circle" src="{{ url_for('static', filename='/img/'+utente.propic ) }}"
+                                 alt="immagine del profilo dell'utente @{{utente.username}}">
+                        </a>
+                        <h3>{{utente.nickname}}</h3>
+                        <h5><strong><a href="{{url_for('profilo', username=utente.username)}}">@{{utente.username}}</a></strong>
+                            {% if utente.creatore==1 %}
+                                <span class="badge bg-success fs-6">Content Creator</span>
+                            {% else %}
+                                <span class="badge bg-primary fs-6">Ascoltatore</span>
+                            {% endif %}
+                        </h5>
+                        <div class="row">
+                            <div class="col justify-content-end">
+                                <p>{{totFollowers}} follower{%if totFollowers!=1%}s{%endif%}</p>
+                            </div>      
+                            <div class="col justify-content-start">
+                                <p><a href="{{url_for('listaSerieSeguite', username=utente.username)}}">{{totSeguiti}}</a> serie seguite</p>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+		<!-- colonna principale -->
+		<main class="col-6 justify-content-center">
+            {% if totSerieSeguite==0 or not seriePubbliche %}
+                {% if current_user.is_authenticated and current_user.username==utente.username%}
+                    <h6>Non segui nessuna serie</h6>
+                {% else %}
+                    <h6>
+                        <a href="{{url_for('profilo', username=utente.username)}}"><strong>{{utente.nickname}}</strong></a>
+                        non segue pubblicamente nessuna serie
+                    </h6>
+                {% endif %}
+            {% endif %}
+            
+			<br>
+			<!-- macro-scheda per le serie pubbliche-->
+            {% if seriePubbliche %}
+                {% if current_user.is_authenticated and current_user.username==utente.username%}
+				    <h5>Le serie che segui pubblicamente</h5>
+                {% else %}
+                    
+				<h5>Le serie seguite pubblicamente da 
+					<strong>@{{utente.username}}</strong>
+				</h5>
+                {% endif %}
+
+				<section class="row row-cols-1 row-cols-md-3 g-4">
+					<!-- matrice di schede di serie -->
+                    {% for s in seriePubbliche %}
+
+                        <div class="col">
+                            <div class="card bg-light">
+                                <a href="{{url_for('serie', codS=s.codS)}}">
+                                    <img src="{{ url_for('static', filename='img/'+s.file) }}" class="card-img-top" alt="Immagine di copertina della serie {{s.titolo}}">
+                                </a>
+                                <div class="card-body">
+                                    <a href="{{url_for('serie', codS=s.codS)}}">
+                                        <h5 class="card-title">{{s.titolo}}</h5>
+                                    </a>
+                                    <a href="{{url_for('profilo', username=s.username)}}">
+                                        <span class="badge bg-primary">di @{{s.username}}</span>
+                                    </a>
+                                    <br>
+                                    <a href="{{url_for('listaSeriePerCategoria', categoria=s.categoria)}}">
+                                        <span class="badge rounded-pill text-bg-info">{{s.categoria}}</span>
+                                    </a>
+                                    <p class="card-text-personalizzato">{{s.descrizione}}</p>
+                                    <div class="row text-center">
+                                        <div class="col-8 text-center">
+                                            <a href="{{url_for('serie', codS=s.codS)}}" type="button" class="btn btn-outline-primary">Ascolta ora</a>
+                                        </div>
+                                        <div class="col text-center">
+                                            {% if current_user.is_authenticated and current_user.username==utente.username%}
+                                                <form action="/switchPubblicoFollow" method="POST">
+                                                    <input type="hidden" name="codS" value="{{s.codS}}">
+                                                    <input type="hidden" name="codU" value="{{current_user.codU}}">
+                                                    <input type="hidden" name="pubblico" value="1">
+                                                    <button type="button" class="btn btn-secondary show" data-bs-toggle="dropdown" aria-expanded="true">⋮</button>
+                                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                                        <li >
+                                                            <button type="submit" class="btn btn-outline-light">❌Rimuovi Serie dal profilo</button>
+                                                        </li>
+                                                    </ul>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+					{% endfor %}
+                </section>
+            {% endif %}
+
+			<!-- macro-scheda per le serie private-->
+            {% if seriePrivate %}
+                {% if current_user.is_authenticated and current_user.username==utente.username%}
+                    <h5> <br>Le serie che segui privatamente</h5>
+					<!-- matrice di schede di serie private-->
+					<section class="row row-cols-1 row-cols-md-3 g-4">
+                        {% for s in seriePrivate %}
+                            <div class="col">
+                                <div class="card bg-light">
+                                    <a href="{{url_for('serie', codS=s.codS)}}">
+                                        <img src="{{ url_for('static', filename='img/'+s.file) }}" 
+                                            class="card-img-top" alt="Immagine di copertina della serie {{s.titolo}}">
+                                    </a>
+                                    <div class="card-body">
+                                    <a href="{{url_for('serie', codS=s.codS)}}">
+                                        <h5 class="card-title">{{s.titolo}}</h5>
+                                    </a>
+                                    <a href="{{url_for('profilo', username=s.username)}}">
+                                        <span class="badge bg-primary">di @{{s.username}}</span>
+                                    </a>
+                                    <br>
+                                    <a href="{{url_for('listaSeriePerCategoria', categoria=s.categoria)}}">
+                                    <span class="badge rounded-pill text-bg-info">{{s.categoria}}</span>
+                                    </a>
+                                    <p class="card-text-personalizzato">{{s.descrizione}}</p>
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <a href="{{url_for('serie', codS=s.codS)}}" type="button" class="btn btn-outline-primary">Ascolta ora</a>
+                                            </div>
+                                            <div class="col">
+                                                {% if current_user.is_authenticated and current_user.username==utente.username%}
+                                                    <form action="/switchPubblicoFollow" method="POST">
+                                                        <input type="hidden" name="codS" value="{{s.codS}}">
+                                                        <input type="hidden" name="codU" value="{{current_user.codU}}">
+                                                        <input type="hidden" name="pubblico" value="0">
+                                                        <button type="button" class="btn btn-secondary show" data-bs-toggle="dropdown" aria-expanded="true">⋮</button>
+                                                        <ul class="dropdown-menu dropdown-menu-dark">
+                                                            <li>
+                                                                <button type="submit" class="btn btn-outline-light">➕Aggiungi Serie al profilo</button>
+                                                            </li>
+                                                        </ul>
+                                                    </form>
+                                                {% endif %}
+                                            </div>          
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>									
+                        {% endfor %}
+                    </section>										
+                {% endif %}
+            {% endif %}
+        </main>
+
+        <!--colonna a sinistra -->
+		<div class="col"> <br> <br> <br>
+            {% if followers %}
+                <div class="card bg-light">
+					<div class="card-body">
+						<h6 class="card-title">
+                            {% if current_user.is_authenticated and current_user.username==utente.username %}
+                                I follower delle tue serie
+                            {% else %}
+                                Follower pubblici delle serie di @<strong><a href="{{url_for('profilo', username=utente.username)}}">{{utente.username}}</strong></a> 
+                            {% endif %}
+                        </h6>
+						<div class="list-group">
+                            {%for f in followers %}
+                                {% if f.pubblico==1 or (current_user.is_authenticated and current_user.username==utente.username) %}
+                                    <a href="{{url_for('profilo', username=f.username)}}" 
+                                        class="list-group-item list-group-item-action">
+                                        <img class="circle-propic-small"
+                                             src="{{ url_for('static', filename='/img/'+f.propic ) }}"
+                                             alt="immagine del profilo dell'utente @{{f.username}}">@{{f.username}}
+                                    </a>
+                                {% endif %}
+                            {%endfor%}
+                        </div>
+					</div>
+				</div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <h1><br></h1>
+    
+
+</div>
+{% endblock %}

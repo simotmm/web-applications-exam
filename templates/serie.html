@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block title %}{{serie.titolo}}{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block content %}
+<p>
+  <strong>Serie Podcast: '{{serie.titolo}}' (di @{{autore.username}})</strong>
+</p>
+
+<div class="row">
+
+    <!-- colonna a sx -->
+    <aside class="col">
+        <br><br><br><br>
+
+        <!-- ricerca episodio per titolo o descrizione -->
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title"> <strong>Cerca Episodio</strong></h6>
+                <div class="form-text font-size-sm">
+                    Cerca tra i titoli e le descrizioni di questa serie
+                </div>
+                <br>
+                <input id="barraDiRicerca" onkeyup="cercaEpisodio()" type="text" class="form-control" placeholder="Cerca...">
+                <div class="list-group list-group-numbered">
+                    {% for e in episodi %}
+                        {% if e.data<=dataCorrente or (current_user.is_authenticated and current_user.username==autore.username) %}
+                            <a href="{{url_for('episodio', codE=e.codE)}}"
+                               class="titoloEpDaCercare nascondi list-group-item list-group-item-action">▶️ <strong>{{e.titolo}}</strong>
+                            </a>
+                            <p class="nascondi">{{e.descrizione}}</p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+
+        <!-- scheda dei follower della serie -->
+        {% if followerPubblici %}
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title"> {% if current_user.is_authenticated and current_user.username==autore.username %} Follower di questa serie {% else %} Follower pubblici di questa serie {% endif %}
+                    </h6>
+                    <div class="list-group">
+                        {%for f in followers %}
+                            {% if f.pubblico==1 or (current_user.is_authenticated and current_user.username==autore.username) %}
+                                <a href="{{url_for('profilo', username=f.username)}}"
+                                    class="list-group-item list-group-item-action">
+                                    <img class="circle-propic-small" src="{{ url_for('static', filename='/img/'+f.propic ) }}"
+                                        alt="immagine del profilo dell'utente @{{ f.username}}">@{{f.username}}
+
+                                </a>
+                            {% endif %}
+                        {%endfor%}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </aside>
+
+    <!--colonna centrale-->
+    <main class="col-7">
+
+        <!--scheda del post-->
+        <article class="row border bg-light rounded p-2 mx-2 my-4">
+
+
+                <!--prima riga del post: immagine, info, descrizione-->
+                <section class="row">
+
+                    <!--colonna per l'imagine serie-->
+                    <div class="col-lg-3 col-md-6 col-sm-12 px-0">
+                        <a href="#">
+                            <img class="w-100 post-image" src="{{ url_for('static', filename='img/'+serie.file) }}"
+                                 alt="immagine della serie '{{serie.titolo}}' ">
+                        </a>
+                        <br>
+                        <br>
+                        <!--bottone modifica serie-->
+                        {% if current_user.is_authenticated and current_user.username==autore.username %}
+                            <div class="col text-center">
+                                <a href="{{url_for('modificaSerie', codS=serie.codS)}}" type="button"
+                                    class="btn btn-primary btn-sm">Modifica Serie
+                                </a>
+                                <br> <br>
+                                <a href="{{url_for('carica')}}" type="button"
+                                    class="btn btn-primary btn-sm">Carica Episodio
+                                </a>
+                            </div>
+                            <br>
+                        {%endif%}
+                    </div>
+
+
+                    <!--colonna per le info-->
+                    <div class="col">
+                        <section class="d-flex align-items-center mt-2 mb-4">
+                            <div>
+                                <h3>{{serie.titolo}}</h3>
+                                <a href="{{url_for('listaSeriePerCategoria', categoria=serie.categoria)}}">
+                                    <span class="badge rounded-pill text-bg-info">{{serie.categoria}}</span>
+                                </a>
+                                <br>
+                                <h7>Una serie di
+                                    <strong>{{autore.nickname}} </strong>
+                                    <br>
+                                    (<strong>
+                                        <a href="{{ url_for('profilo', username=autore.username) }}">@{{autore.username}}</a>)
+                                    </strong>
+                                </h7>
+                                <br>
+                                <a href="{{ url_for('profilo', username=autore.username) }}">
+                                    <img class="usrimg rounded-circle" src="{{ url_for('static', filename='/img/'+autore.propic ) }}"
+                                        alt="immagine del profilo dell'utente @{{ autore.username}}">
+                                </a>
+                            </div>
+                        </section>
+                    </div>
+
+
+                    <!--colonna per scheda descrizione serie-->
+                    <div class="col">
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                Descrizione Serie
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{ serie.descrizione |e }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- riga con "episodi e pulsante"-->
+                <div class="row">
+                    <br>
+                    <hr class="border">
+
+                    <!--"Episodi"-->
+                    <div class="col">
+                        <h6>Episodi</h6>
+                    </div>
+
+                    <!--pulsante segui serie-->
+
+                    <div class="col text-end">
+                        {%if current_user.is_authenticated%}
+                            <form action="follow" method="POST" id="follow">
+                                <input type="hidden" name="codS" value="{{ serie.codS }}" />
+                                <input type="hidden" name="codU" value="{{ current_user.codU }}" />
+                                <button class="btn btn-primary" type="submit">
+                                    {% if follow %}
+                                        Smetti di seguire
+                                    {% else %}
+                                        Segui Serie Podcast
+                                    {% endif %}
+                                </button>
+                            </form>
+                        {% else %}
+                            <p>Per seguire il podcast
+                                <a href="{{url_for('login')}}" type="button"
+                                   class="btn btn-primary btn-sm">accedi
+                                </a> o
+                                <a href="{{url_for('iscriviti')}}" type="button"
+                                   class="btn btn-primary btn-sm">registrati
+                                </a>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!--spazio prima della tabella degli episodi-->
+                <div class="row"><br></div>
+
+                <!--riga episodi-->
+                <div class="row">
+
+                    {% if current_user.is_authenticated and current_user.codU==autore.codU and not episodi %}
+                        <div class="list-group ">
+                            <p class="list-group-item list-group-item-action"> Questo podcast non ha ancora nessun episodio</p>
+                        </div>
+                    {% elif not episodiPubblici %}
+                        <div class="list-group ">
+                            <p class="list-group-item list-group-item-action"> Questo podcast non ha ancora nessun episodio, stay tuned!</p>
+                        </div>
+                    {% else %}
+                        <div class="list-group list-group-numbered">
+                            {%for e in episodi %}
+                                {% if( (e.data<=dataCorrente) or (current_user.is_authenticated and current_user.codU==e.codU) ) %}
+                                    <a href="{{url_for('episodio', codE=e.codE)}}"
+                                       class="list-group-item list-group-item-action">▶️{{e.titolo}}
+                                    </a>
+                                {%endif%}
+                            {%endfor%}
+                        </div>
+                    {%endif%}
+                </div>
+
+
+        </article>
+    </main>
+
+    <!-- colonna a dx-->
+    <div class="col">
+        <br>
+        <br>
+       {%if altreSerieDellaCategoria %}
+            <aside class="aside-col-left">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                            <h6 class="card-title">Altre serie della categoria
+                                <a href="{{url_for('listaSeriePerCategoria', categoria=serie.categoria)}}">
+                                    <span class="badge rounded-pill text-bg-info">{{serie.categoria}}</span>
+                                </a>
+                            </h6>
+                            <div class="list-group">
+                                {%for s in altreSerieDellaCategoria %}
+                                    {%if serie.codS!=s.codS%}
+                                        <a href="{{url_for('serie', codS=s.codS)}}"
+                                           class="list-group-item list-group-item-action">{{s.titolo}}
+                                        </a>
+                                    {%endif%}
+                                {%endfor%}
+                            </div>
+                    </div>
+                </div>
+            </aside>
+        {%endif%}
+
+
+        {%if serie and altreSerieDellAutore %}
+            <br>
+            <aside class="aside-col-left">
+                <div class="card bg-light" >
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Altre serie di <a href="{{url_for('profilo', username=autore.username)}}">@{{autore.username}}</a></h6>
+                                <div class="list-group">
+                                    {%for s in altreSerieDellAutore %}
+                                    {%if serie.codS!=s.codS%}
+                                        <a href="{{url_for('serie', codS=s.codS)}}" class="list-group-item list-group-item-action">{{s.titolo}}</a>
+                                    {%endif%}
+                                    {%endfor%}
+                                </div>
+                            </div>
+                </div>
+            </aside>
+        {%endif%}
+        <br>
+
+    </div>
+    <h1><br></h1>
+
+</div>
+
+{% endblock %}

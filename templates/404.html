@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Errore{% endblock %}
+
+{% block content %}
+
+<main class="row text-center">
+    <div class="col"></div>
+    <article class="col-5">
+        <h1>Pagina non trovata</h1>
+        <h4 class="text-muted">Qualcosa è andato storto...</h4>
+
+        <img src="{{url_for('static', filename='/img/'+'404.png')}}" alt="immagine di errore" class="rounded">
+        <br><br>
+        <a href="{{url_for('home')}}" type="button" class="btn btn-primary btn-lg"> Vai alla Homepage</a>
+        <br><br>
+    </article>
+    <div class="col"></div>
+</main>
+
+
+
+{% endblock %}

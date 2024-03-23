@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Profilo: @{{utente.username}} {% endblock %}
+{% block signup_active %}active{% endblock %}
+
+{% block content %}
+
+
+<div class="container">
+
+    <!--riga principale profilo-->
+    <main class="row">
+
+        <!--colonna sx-->
+        <aside class="col-2 align-self-center"></aside>
+
+        <!--colonna centrale-->
+        <main class="col-8 text-center justify-self-center">
+
+            <!--propic-->
+            <section class="row-4 justify-self-center">
+                {% if current_user.is_authenticated and current_user.username==utente.username %}
+                    <p class="justify-content-center">Il tuo profilo</p>
+                {% else %}
+                    <p class="justify-content-center">Profilo Utente</p>
+                {% endif %}
+                <h3>{{utente.nickname}}</h3>
+                    <img width="300" class="circle shadowOutline" src="{{ url_for('static', filename='/img/'+utente.propic ) }}"
+                         alt="immagine del profilo dell'utente @{{utente.username}}">
+            </section>
+
+            <!--dati utente-->
+            <section class="row">
+                <h1><strong>@{{utente.username}}</strong>
+                    {% if utente.creatore==1 %}
+                        <span class="badge bg-success fs-6">Content Creator</span>
+                    {% else %}
+                        <span class="badge bg-primary fs-6">Ascoltatore</span>
+                    {% endif %}
+                </h1>
+
+                <div class="container text-center">
+                    <h5>Profilo Privato</h5>
+                </div>
+
+                <h1 class="display-5">
+                    <a href="{{url_for('home')}}"
+                        type="button" class="btn btn-primary btn-lg">
+                            Torna alla Homepage
+                    </a>
+                </h1>
+
+            </section>
+
+        </main>
+
+        <!--colonna dx-->
+        <section class="col align-self-center"></section>
+
+    </main>
+
+</div>
+
+<h1><br></h1>
+<h1><br></h1>
+<h1><br></h1>
+
+
+{% endblock %}
