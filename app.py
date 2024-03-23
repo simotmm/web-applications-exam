@@ -571,8 +571,9 @@ def iscrivitiPost():
 
     userInDB=dao.getUtenteByUsername(username)
 
-    if("/" in username):
-        flash("Errore: l'username non può contentere '/'.", "danger")
+    if("/" in username or " " in username):
+        flash("Errore: l'username non può contentere '/' o spazi.", "danger")
+        return redirect(url_for('iscriviti'))
 
     if userInDB:
         flash("Errore: siste già un utente con username '"+username+"', riprova con un altro username.", "danger")
